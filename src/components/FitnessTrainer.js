@@ -7,8 +7,10 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: clamp(16px, 2vw, 32px);
   min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   font-family: 'Arial', sans-serif;
 `;
@@ -16,8 +18,8 @@ const Container = styled.div`
 const Header = styled.h1`
   color: white;
   text-align: center;
-  margin-bottom: 30px;
-  font-size: 2.5rem;
+  margin-bottom: clamp(20px, 4vw, 40px);
+  font-size: clamp(2rem, 4vw, 3rem);
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 `;
 
@@ -26,24 +28,41 @@ const CameraContainer = styled.div`
   border-radius: 15px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  margin-bottom: 30px;
+  margin-bottom: clamp(20px, 3vw, 40px);
+  width: min(90vw, 720px);
+  aspect-ratio: 4 / 3;
+  background: rgba(0, 0, 0, 0.2);
 `;
 
 const WebcamStyled = styled(Webcam)`
-  width: 640px;
-  height: 480px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const PoseOverlayImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  opacity: 0.85;
+  border-radius: 15px;
 `;
 
 const Controls = styled.div`
   display: flex;
-  gap: 15px;
-  margin-bottom: 30px;
+  gap: clamp(10px, 2vw, 20px);
+  margin-bottom: clamp(20px, 3vw, 40px);
   flex-wrap: wrap;
   justify-content: center;
+  width: min(95vw, 720px);
 `;
 
 const Button = styled.button`
-  padding: 12px 24px;
+  padding: 12px clamp(16px, 3vw, 28px);
   border: none;
   border-radius: 25px;
   background: ${props => props.primary ? '#ff6b6b' : '#4ecdc4'};
@@ -67,7 +86,7 @@ const Button = styled.button`
 `;
 
 const Select = styled.select`
-  padding: 12px 20px;
+  padding: 12px clamp(16px, 2vw, 24px);
   border: none;
   border-radius: 25px;
   background: white;
@@ -79,10 +98,9 @@ const Select = styled.select`
 const AnalysisContainer = styled.div`
   background: white;
   border-radius: 15px;
-  padding: 25px;
+  padding: clamp(20px, 3vw, 32px);
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  max-width: 600px;
-  width: 100%;
+  width: min(95vw, 680px);
 `;
 
 const ScoreDisplay = styled.div`
@@ -91,8 +109,8 @@ const ScoreDisplay = styled.div`
 `;
 
 const ScoreCircle = styled.div`
-  width: 120px;
-  height: 120px;
+  width: clamp(100px, 12vw, 140px);
+  height: clamp(100px, 12vw, 140px);
   border-radius: 50%;
   background: ${props => {
     if (props.score >= 0.8) return 'linear-gradient(135deg, #4CAF50, #45a049)';
@@ -175,6 +193,7 @@ const FitnessTrainer = () => {
   const [selectedExercise, setSelectedExercise] = useState('squat');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [poseOverlay, setPoseOverlay] = useState(null);
   const [error, setError] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
 
@@ -212,6 +231,7 @@ const FitnessTrainer = () => {
       const formData = new FormData();
       formData.append('file', blob, 'image.jpg');
       formData.append('exercise_type', selectedExercise);
+      formData.append('include_pose_overlay', 'true');
 
       // Send to backend
       const result = await axios.post(`${API_BASE_URL}/analyze-posture`, formData, {
@@ -221,6 +241,11 @@ const FitnessTrainer = () => {
       });
 
       setAnalysisResult(result.data);
+      if (result.data.pose_overlay_image) {
+        setPoseOverlay(`data:image/jpeg;base64,${result.data.pose_overlay_image}`);
+      } else {
+        setPoseOverlay(null);
+      }
     } catch (err) {
       setError(err.response?.data?.detail || err.message || 'An error occurred during analysis');
     } finally {
@@ -275,6 +300,12 @@ const FitnessTrainer = () => {
             facingMode: "user"
           }}
         />
+        {poseOverlay && (
+          <PoseOverlayImage
+            src={poseOverlay}
+            alt="Pose overlay on camera"
+          />
+        )}
       </CameraContainer>
 
       <Controls>
@@ -310,6 +341,16 @@ const FitnessTrainer = () => {
 
       {analysisResult && (
         <AnalysisContainer>
+          {poseOverlay && (
+            <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+              <h3>Detected Pose</h3>
+              <img 
+                src={poseOverlay} 
+                alt="Pose overlay" 
+                style={{ maxWidth: '100%', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}
+              />
+            </div>
+          )}
           <ScoreDisplay>
             <ScoreCircle score={analysisResult.form_score}>
               {Math.round(analysisResult.form_score * 100)}%

@@ -10,6 +10,7 @@ from typing import Dict, List, Optional
 import time
 import sys
 import os
+import base64
 
 # Add the backend directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -43,7 +44,8 @@ async def health_check():
 @app.post("/analyze-posture")
 async def analyze_posture(
     file: UploadFile = File(...),
-    exercise_type: str = Form("squat")
+    exercise_type: str = Form("squat"),
+    include_pose_overlay: bool = Form(False)
 ):
     """
     Analyze exercise posture from uploaded image/video
@@ -92,6 +94,14 @@ async def analyze_posture(
             "analysis_time_ms": round(analysis_time * 1000, 2),
             "timestamp": time.time()
         }
+
+        if include_pose_overlay:
+            pose_landmarks = posture_analyzer.extract_pose_landmarks(image_cv)
+            if pose_landmarks is not None:
+                overlay_image = posture_analyzer.draw_pose_landmarks(image_cv, pose_landmarks)
+                success, buffer = cv2.imencode(".jpg", overlay_image)
+                if success:
+                    response["pose_overlay_image"] = base64.b64encode(buffer).decode("utf-8")
         
         return JSONResponse(content=response)
         

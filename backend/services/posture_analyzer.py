@@ -4,6 +4,7 @@ import numpy as np
 from typing import Dict, List, Tuple, Optional
 import json
 from dataclasses import dataclass
+from mediapipe.framework.formats import landmark_pb2
 
 @dataclass
 class PostureAnalysis:
@@ -27,6 +28,7 @@ class PostureAnalyzer:
             min_tracking_confidence=0.3
         )
         self.mp_drawing = mp.solutions.drawing_utils
+        self._last_landmark_visibilities: List[float] = []
         
         # Note: Removed PyTorch models for better performance
         # Using rule-based analysis instead of ML models for MVP
@@ -69,12 +71,16 @@ class PostureAnalyzer:
             
             if results.pose_landmarks:
                 landmarks = []
+                self._last_landmark_visibilities = []
                 for landmark in results.pose_landmarks.landmark:
                     landmarks.extend([landmark.x, landmark.y, landmark.z])
+                    self._last_landmark_visibilities.append(landmark.visibility)
                 return np.array(landmarks)
+            self._last_landmark_visibilities = []
             return None
         except Exception as e:
             print(f"Error extracting pose landmarks: {e}")
+            self._last_landmark_visibilities = []
             return None
     
     def calculate_angles(self, landmarks: np.ndarray) -> Dict[str, float]:
@@ -183,6 +189,7 @@ class PostureAnalyzer:
         """Check if entire body is visible and provide specific feedback"""
         visibility_issues = []
         missing_parts = []
+        visibilities = self._last_landmark_visibilities if self._last_landmark_visibilities else []
         
         # Define body parts and their MediaPipe indices
         body_parts = {
@@ -202,8 +209,8 @@ class PostureAnalyzer:
                 if idx < len(points):
                     part_total += 1
                     x, y, z = points[idx]
-                    # Check if point is visible and within frame
-                    if 0.05 <= x <= 0.95 and 0.05 <= y <= 0.95 and abs(z) < 0.5:
+                    visibility_score = visibilities[idx] if idx < len(visibilities) else 1.0
+                    if 0.0 <= x <= 1.0 and 0.0 <= y <= 1.0 and abs(z) < 1.0 and visibility_score >= 0.3:
                         part_visible += 1
             
             if part_total > 0:
@@ -590,30 +597,25 @@ class PostureAnalyzer:
         if landmarks is None:
             return image
         
-        # Convert landmarks back to MediaPipe format for drawing
-        pose_landmarks = []
         points = landmarks.reshape(-1, 3)
+        normalized_landmarks = []
         
         for point in points:
-            landmark = self.mp_pose.PoseLandmark()
-            landmark.x = point[0]
-            landmark.y = point[1]
-            landmark.z = point[2]
-            landmark.visibility = 1.0
-            pose_landmarks.append(landmark)
+            normalized_landmarks.append(
+                landmark_pb2.NormalizedLandmark(
+                    x=float(point[0]),
+                    y=float(point[1]),
+                    z=float(point[2]),
+                    visibility=1.0
+                )
+            )
         
-        # Create a mock results object for drawing
-        class MockResults:
-            def __init__(self, landmarks):
-                self.pose_landmarks = type('Landmarks', (), {'landmark': landmarks})()
+        landmark_list = landmark_pb2.NormalizedLandmarkList(landmark=normalized_landmarks)
         
-        mock_results = MockResults(pose_landmarks)
-        
-        # Draw landmarks
         annotated_image = image.copy()
         self.mp_drawing.draw_landmarks(
             annotated_image,
-            mock_results.pose_landmarks,
+            landmark_list,
             self.mp_pose.POSE_CONNECTIONS,
             landmark_drawing_spec=self.mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2),
             connection_drawing_spec=self.mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2)

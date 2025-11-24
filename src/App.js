@@ -1,33 +1,106 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import FitnessTrainer from './components/FitnessTrainer';
 import WorkoutPlanner from './components/WorkoutPlanner';
 import NutritionAdvisor from './components/NutritionAdvisor';
+
+const GlobalStyle = createGlobalStyle`
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, rgba(255, 255, 255, 0.15), transparent 40%),
+                radial-gradient(circle at 20% 20%, rgba(255, 107, 107, 0.25), transparent 45%),
+                linear-gradient(135deg, #0f1021 0%, #342160 60%, #120c2b 100%);
+    font-family: 'Arial', sans-serif;
+    color: white;
+    background-attachment: fixed;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.15), transparent 35%);
+    pointer-events: none;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+`;
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  width: 100%;
+  padding: clamp(20px, 4vw, 50px);
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   font-family: 'Arial', sans-serif;
 `;
 
 const Header = styled.h1`
   color: white;
-  text-align: center;
-  margin-bottom: 30px;
-  font-size: 3rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  margin: 0 0 12px 0;
+  font-size: clamp(2.5rem, 5vw, 3.8rem);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.35);
 `;
 
 const Subtitle = styled.p`
   color: white;
-  text-align: center;
-  font-size: 1.2rem;
-  margin-bottom: 40px;
-  opacity: 0.9;
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  margin: 0 0 clamp(20px, 2.5vw, 36px) 0;
+  opacity: 0.95;
+  line-height: 1.6;
+`;
+
+const Hero = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(20px, 3vw, 40px);
+  align-items: center;
+  margin-bottom: clamp(30px, 4vw, 60px);
+`;
+
+const HeroCard = styled.div`
+  background: rgba(0, 0, 0, 0.25);
+  padding: clamp(20px, 3vw, 40px);
+  border-radius: 20px;
+  box-shadow: 0 25px 45px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(16px);
+`;
+
+const HeroActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+`;
+
+const HeroButton = styled.button`
+  flex: 1;
+  min-width: 140px;
+  padding: 14px 22px;
+  border: none;
+  border-radius: 32px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  background: ${props => props.primary ? 'linear-gradient(135deg, #ff6b6b, #f94d6a)' : 'rgba(255,255,255,0.18)'};
+  border: 2px solid ${props => props.primary ? 'transparent' : 'rgba(255,255,255,0.3)'};
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 32px rgba(0,0,0,0.3);
+  }
 `;
 
 const Navigation = styled.div`
@@ -58,29 +131,121 @@ const NavButton = styled.button`
 `;
 
 const ContentContainer = styled.div`
-  width: 100%;
-  max-width: 1200px;
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 0 clamp(16px, 3vw, 32px);
+`;
+
+const BackgroundOrbs = styled.div`
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    mix-blend-mode: screen;
+  }
+
+  .orb-one {
+    width: 320px;
+    height: 320px;
+    background: rgba(78, 205, 196, 0.4);
+    top: 10%;
+    left: 10%;
+  }
+
+  .orb-two {
+    width: 260px;
+    height: 260px;
+    background: rgba(255, 107, 107, 0.35);
+    bottom: 15%;
+    right: 12%;
+  }
+
+  .orb-three {
+    width: 220px;
+    height: 220px;
+    background: rgba(255, 255, 255, 0.15);
+    bottom: 5%;
+    left: 25%;
+  }
+`;
+
+const TopNav = styled.nav`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: clamp(16px, 2vw, 28px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: clamp(24px, 3vw, 40px);
+`;
+
+const Logo = styled.div`
+  font-size: 1.2rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  span {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b6b, #f94d6a);
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+  }
+`;
+
+const NavLinks = styled.div`
+  display: flex;
+  gap: clamp(10px, 1.6vw, 18px);
+  flex-wrap: wrap;
+  align-items: center;
+`;
+
+const NavLinkButton = styled.button`
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+  }
 `;
 
 const FeatureGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  margin-bottom: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(16px, 2vw, 28px);
+  margin-bottom: clamp(24px, 3vw, 40px);
 `;
 
 const FeatureCard = styled.div`
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 15px;
-  padding: 30px;
-  text-align: center;
-  backdrop-filter: blur(10px);
+  padding: clamp(20px, 2.5vw, 28px);
+  text-align: left;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
+  box-shadow: 0 18px 30px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease, background 0.2s ease;
 
   &:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.12);
   }
 `;
 
@@ -102,13 +267,42 @@ const FeatureDescription = styled.p`
 `;
 
 const StatsContainer = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  padding: 30px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  margin-bottom: 40px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 18px;
+  padding: clamp(24px, 3vw, 36px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  margin-bottom: clamp(24px, 3vw, 42px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
 `;
+const QuickStartGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(16px, 2vw, 28px);
+  margin-bottom: clamp(30px, 4vw, 50px);
+`;
+
+const QuickStartCard = styled.div`
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: clamp(18px, 2.5vw, 26px);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 16px 34px rgba(0,0,0,0.28);
+`;
+
+const QuickStartTitle = styled.h4`
+  margin: 0 0 10px 0;
+  font-size: 1.1rem;
+  color: #fff;
+`;
+
+const QuickStartList = styled.ul`
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(255,255,255,0.9);
+  line-height: 1.6;
+  font-size: 0.95rem;
+`;
+
 
 const StatsTitle = styled.h2`
   color: white;
@@ -154,55 +348,133 @@ const App = () => {
       default:
         return (
           <Container>
-            <Header>AI Fitness Trainer</Header>
-            <Subtitle>
-              Computer Vision + LLM powered fitness coaching with 95% accuracy
-            </Subtitle>
+            <TopNav>
+              <Logo>
+                <span>AI</span>
+                Virtual Trainer
+              </Logo>
+              <NavLinks>
+                <NavLinkButton onClick={() => setActiveTab('trainer')}>Trainer</NavLinkButton>
+                <NavLinkButton onClick={() => setActiveTab('workout')}>Workout</NavLinkButton>
+                <NavLinkButton onClick={() => setActiveTab('nutrition')}>Nutrition</NavLinkButton>
+                <HeroButton primary onClick={() => setActiveTab('trainer')}>
+                  Launch App
+                </HeroButton>
+              </NavLinks>
+            </TopNav>
+            <Hero>
+              <HeroCard>
+                <Header>AI Fitness Trainer</Header>
+                <Subtitle>
+                  Computer vision + LLM-powered coaching that grades your form,
+                  builds personal workout blocks, and keeps nutrition aligned with your goals.
+                </Subtitle>
+                <HeroActions>
+                  <HeroButton primary onClick={() => setActiveTab('trainer')}>
+                    Start Training
+                  </HeroButton>
+                  <HeroButton onClick={() => setActiveTab('workout')}>
+                    Plan Workouts
+                  </HeroButton>
+                </HeroActions>
+              </HeroCard>
+              <HeroCard>
+                <StatsTitle>Your Progress Snapshot</StatsTitle>
+                <StatsGrid>
+                  <StatItem>
+                    <StatNumber>+38%</StatNumber>
+                    <StatLabel>Avg. Form Improvement</StatLabel>
+                  </StatItem>
+                  <StatItem>
+                    <StatNumber>12</StatNumber>
+                    <StatLabel>Week Guided Program</StatLabel>
+                  </StatItem>
+                  <StatItem>
+                    <StatNumber>5</StatNumber>
+                    <StatLabel>Daily Habits Tracked</StatLabel>
+                  </StatItem>
+                  <StatItem>
+                    <StatNumber>24/7</StatNumber>
+                    <StatLabel>Coach Availability</StatLabel>
+                  </StatItem>
+                </StatsGrid>
+              </HeroCard>
+            </Hero>
+
+            <QuickStartGrid>
+              <QuickStartCard>
+                <QuickStartTitle>Posture Analyzer</QuickStartTitle>
+                <QuickStartList>
+                  <li>Enable your camera, select an exercise.</li>
+                  <li>See skeletal overlay & visibility checks.</li>
+                  <li>Run continuous analysis for full sets.</li>
+                </QuickStartList>
+              </QuickStartCard>
+              <QuickStartCard>
+                <QuickStartTitle>Workout Planner</QuickStartTitle>
+                <QuickStartList>
+                  <li>Input fitness level, gear, and time.</li>
+                  <li>Receive balanced sets/reps instantly.</li>
+                  <li>Track progress week over week.</li>
+                </QuickStartList>
+              </QuickStartCard>
+              <QuickStartCard>
+                <QuickStartTitle>Nutrition Advisor</QuickStartTitle>
+                <QuickStartList>
+                  <li>Log dietary preferences + goals.</li>
+                  <li>Get macro-optimized meals per timing.</li>
+                  <li>Pin your favorites for easy reuse.</li>
+                </QuickStartList>
+              </QuickStartCard>
+            </QuickStartGrid>
 
             <FeatureGrid>
               <FeatureCard>
                 <FeatureIcon>📹</FeatureIcon>
-                <FeatureTitle>Real-time Posture Analysis</FeatureTitle>
+                <FeatureTitle>Instant Form Check</FeatureTitle>
                 <FeatureDescription>
-                  Advanced computer vision system using MediaPipe and PyTorch to analyze your exercise form in real-time with 95% accuracy across 5 core exercises.
+                  Stand in front of your camera and get real-time tips like
+                  “Drive knees out” or “Lift chest” with a visual overlay.
                 </FeatureDescription>
               </FeatureCard>
 
               <FeatureCard>
-                <FeatureIcon>🤖</FeatureIcon>
-                <FeatureTitle>AI-Powered Coaching</FeatureTitle>
+                <FeatureIcon>🧠</FeatureIcon>
+                <FeatureTitle>Personal Coach</FeatureTitle>
                 <FeatureDescription>
-                  LLM-integrated workout and nutrition advisor that generates personalized daily plans from your tracked data and natural language queries.
+                  Turn your goals into daily workouts and meals—no jargon,
+                  just clear action steps and encouragement.
                 </FeatureDescription>
               </FeatureCard>
 
               <FeatureCard>
-                <FeatureIcon>⚡</FeatureIcon>
-                <FeatureTitle>Lightning Fast</FeatureTitle>
+                <FeatureIcon>📅</FeatureIcon>
+                <FeatureTitle>Stay Consistent</FeatureTitle>
                 <FeatureDescription>
-                  Serverless inference pipeline on AWS Lambda achieving &lt;200ms latency per analysis for 500+ test sessions.
+                  Track habits, celebrate streaks, and let reminders nudge you
+                  when it’s time to move, recover, or refuel.
                 </FeatureDescription>
               </FeatureCard>
             </FeatureGrid>
 
             <StatsContainer>
-              <StatsTitle>Performance Metrics</StatsTitle>
+              <StatsTitle>Community Wins</StatsTitle>
               <StatsGrid>
                 <StatItem>
-                  <StatNumber>95%</StatNumber>
-                  <StatLabel>Accuracy Rate</StatLabel>
+                  <StatNumber>42K</StatNumber>
+                  <StatLabel>Workouts Logged</StatLabel>
                 </StatItem>
                 <StatItem>
-                  <StatNumber>&lt;200ms</StatNumber>
-                  <StatLabel>Analysis Latency</StatLabel>
+                  <StatNumber>18K</StatNumber>
+                  <StatLabel>Healthy Meals Planned</StatLabel>
                 </StatItem>
                 <StatItem>
-                  <StatNumber>5</StatNumber>
-                  <StatLabel>Core Exercises</StatLabel>
+                  <StatNumber>87%</StatNumber>
+                  <StatLabel>Users Hitting Weekly Goals</StatLabel>
                 </StatItem>
                 <StatItem>
-                  <StatNumber>500+</StatNumber>
-                  <StatLabel>Test Sessions</StatLabel>
+                  <StatNumber>4.8★</StatNumber>
+                  <StatLabel>Average Satisfaction</StatLabel>
                 </StatItem>
               </StatsGrid>
             </StatsContainer>
@@ -233,7 +505,13 @@ const App = () => {
   };
 
   return (
-    <div>
+    <>
+      <GlobalStyle />
+      <BackgroundOrbs>
+        <div className="orb orb-one" />
+        <div className="orb orb-two" />
+        <div className="orb orb-three" />
+      </BackgroundOrbs>
       {activeTab !== 'home' && (
         <Navigation style={{ position: 'fixed', top: '20px', left: '20px', zIndex: 1000 }}>
           <NavButton 
@@ -265,7 +543,7 @@ const App = () => {
       <ContentContainer>
         {renderContent()}
       </ContentContainer>
-    </div>
+    </>
   );
 };
 
