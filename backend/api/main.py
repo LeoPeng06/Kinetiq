@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import cv2
@@ -15,7 +15,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from services.posture_analyzer import PostureAnalyzer, PostureAnalysis
-from services.virtual_coach_advisor import VirtualCoachAdvisor, WorkoutPlan, NutritionAdvice
+from services.llm_advisor import VirtualCoachAdvisor, WorkoutPlan, NutritionAdvice
 
 app = FastAPI(title="Virtual Fitness Trainer API", version="1.0.0")
 
@@ -43,7 +43,7 @@ async def health_check():
 @app.post("/analyze-posture")
 async def analyze_posture(
     file: UploadFile = File(...),
-    exercise_type: str = "squat"
+    exercise_type: str = Form("squat")
 ):
     """
     Analyze exercise posture from uploaded image/video
@@ -239,8 +239,8 @@ async def get_exercise_library():
 @app.post("/analyze-video")
 async def analyze_video(
     file: UploadFile = File(...),
-    exercise_type: str = "squat",
-    frame_interval: int = 5
+    exercise_type: str = Form("squat"),
+    frame_interval: int = Form(5)
 ):
     """
     Analyze exercise posture from uploaded video (analyzes every nth frame)

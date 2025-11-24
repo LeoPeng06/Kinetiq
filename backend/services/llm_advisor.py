@@ -29,8 +29,8 @@ class VirtualCoachAdvisor:
     """Virtual fitness and nutrition advisor (API/LLM-integrated)"""
     
     def __init__(self):
-        # Initialize generic API client (set API_KEY in .env)
-        api_key = os.getenv("API_KEY")
+        # Initialize generic API client (set OPENAI_API_KEY in .env)
+        api_key = os.getenv("OPENAI_API_KEY")
         if api_key and api_key != "your-api-key-here":
             # Replace with generic client setup if applicable
             self.client = None  # TODO: Add client initialization
@@ -38,7 +38,7 @@ class VirtualCoachAdvisor:
         else:
             self.client = None
             self.has_api_key = False
-            print("⚠️  API key not set. Using fallback responses.")
+            print("⚠️  OPENAI_API_KEY not set. Using fallback responses.")
         self.exercise_database = {
             'squat': {
                 'muscles': ['quadriceps', 'glutes', 'hamstrings', 'core'],
