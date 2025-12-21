@@ -202,22 +202,32 @@ const TopNav = styled.nav`
 `;
 
 const Logo = styled.div`
-  font-size: 1.2rem;
-  font-weight: bold;
-  letter-spacing: 0.05em;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 
   span {
     display: inline-flex;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ff6b6b, #f94d6a);
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     justify-content: center;
     align-items: center;
-    font-size: 1rem;
+    font-size: 1.3rem;
+    font-weight: 800;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transform: rotate(-5deg);
+    transition: transform 0.3s ease;
+  }
+
+  &:hover span {
+    transform: rotate(0deg) scale(1.05);
   }
 `;
 
@@ -367,24 +377,24 @@ const App = () => {
           <Container>
             <TopNav>
               <Logo>
-                <span>AI</span>
-                Virtual Trainer
+                <span>K</span>
+                Kinetiq
               </Logo>
               <NavLinks>
                 <NavLinkButton onClick={() => setActiveTab('trainer')}>Trainer</NavLinkButton>
                 <NavLinkButton onClick={() => setActiveTab('workout')}>Workout</NavLinkButton>
                 <NavLinkButton onClick={() => setActiveTab('nutrition')}>Nutrition</NavLinkButton>
                 <HeroButton primary onClick={() => setActiveTab('trainer')}>
-                  Launch App
+                  Get Started
                 </HeroButton>
               </NavLinks>
             </TopNav>
             <Hero>
               <HeroCard>
-                <Header>AI Fitness Trainer</Header>
+                <Header>Kinetiq</Header>
                 <Subtitle>
-                  Computer vision + LLM-powered coaching that grades your form,
-                  builds personal workout blocks, and keeps nutrition aligned with your goals.
+                  Your AI-powered fitness companion. Real-time form analysis, personalized workouts,
+                  and smart nutrition guidance—all in one modern platform designed to elevate your training.
                 </Subtitle>
                 <HeroActions>
                   <HeroButton primary onClick={() => setActiveTab('trainer')}>
@@ -420,56 +430,56 @@ const App = () => {
 
             <QuickStartGrid>
               <QuickStartCard>
-                <QuickStartTitle>Posture Analyzer</QuickStartTitle>
+                <QuickStartTitle>🎥 Form Analyzer</QuickStartTitle>
                 <QuickStartList>
-                  <li>Enable your camera, select an exercise.</li>
-                  <li>See skeletal overlay & visibility checks.</li>
-                  <li>Run continuous analysis for full sets.</li>
+                  <li>Enable camera permissions and select your exercise</li>
+                  <li>View real-time pose detection with visual feedback</li>
+                  <li>Get instant form corrections and improvement tips</li>
                 </QuickStartList>
               </QuickStartCard>
               <QuickStartCard>
-                <QuickStartTitle>Workout Planner</QuickStartTitle>
+                <QuickStartTitle>📋 Workout Builder</QuickStartTitle>
                 <QuickStartList>
-                  <li>Input fitness level, gear, and time.</li>
-                  <li>Receive balanced sets/reps instantly.</li>
-                  <li>Track progress week over week.</li>
+                  <li>Set your fitness level, goals, and available equipment</li>
+                  <li>Receive AI-generated workout plans in seconds</li>
+                  <li>Track your progress and adjust difficulty over time</li>
                 </QuickStartList>
               </QuickStartCard>
               <QuickStartCard>
-                <QuickStartTitle>Nutrition Advisor</QuickStartTitle>
+                <QuickStartTitle>🍎 Nutrition Guide</QuickStartTitle>
                 <QuickStartList>
-                  <li>Log dietary preferences + goals.</li>
-                  <li>Get macro-optimized meals per timing.</li>
-                  <li>Pin your favorites for easy reuse.</li>
+                  <li>Share your dietary preferences and fitness goals</li>
+                  <li>Get personalized meal recommendations with macros</li>
+                  <li>Save favorite meals and build your nutrition library</li>
                 </QuickStartList>
               </QuickStartCard>
             </QuickStartGrid>
 
             <FeatureGrid>
               <FeatureCard>
-                <FeatureIcon>📹</FeatureIcon>
-                <FeatureTitle>Instant Form Check</FeatureTitle>
+                <FeatureIcon>🎯</FeatureIcon>
+                <FeatureTitle>Real-Time Form Analysis</FeatureTitle>
                 <FeatureDescription>
-                  Stand in front of your camera and get real-time tips like
-                  “Drive knees out” or “Lift chest” with a visual overlay.
+                  Advanced computer vision technology provides instant feedback on your exercise form.
+                  Get personalized corrections and tips to perfect every movement.
                 </FeatureDescription>
               </FeatureCard>
 
               <FeatureCard>
-                <FeatureIcon>🧠</FeatureIcon>
-                <FeatureTitle>Personal Coach</FeatureTitle>
+                <FeatureIcon>💪</FeatureIcon>
+                <FeatureTitle>Personalized Workouts</FeatureTitle>
                 <FeatureDescription>
-                  Turn your goals into daily workouts and meals—no jargon,
-                  just clear action steps and encouragement.
+                  AI-generated workout plans tailored to your fitness level, goals, and available equipment.
+                  Every session is optimized for maximum results.
                 </FeatureDescription>
               </FeatureCard>
 
               <FeatureCard>
-                <FeatureIcon>📅</FeatureIcon>
-                <FeatureTitle>Stay Consistent</FeatureTitle>
+                <FeatureIcon>🥗</FeatureIcon>
+                <FeatureTitle>Smart Nutrition</FeatureTitle>
                 <FeatureDescription>
-                  Track habits, celebrate streaks, and let reminders nudge you
-                  when it’s time to move, recover, or refuel.
+                  Meal plans and nutrition advice aligned with your fitness goals.
+                  Track macros, discover new recipes, and fuel your body right.
                 </FeatureDescription>
               </FeatureCard>
             </FeatureGrid>
@@ -530,29 +540,33 @@ const App = () => {
         <div className="orb orb-three" />
       </BackgroundOrbs>
       {activeTab !== 'home' && (
-        <Navigation style={{ position: 'fixed', top: '20px', left: '20px', zIndex: 1000 }}>
+        <Navigation style={{ position: 'fixed', top: '20px', left: '20px', zIndex: 1000, background: 'rgba(15, 16, 33, 0.85)', padding: '12px 16px', borderRadius: '20px', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
           <NavButton 
             active={activeTab === 'trainer'} 
             onClick={() => setActiveTab('trainer')}
+            aria-label="Fitness Trainer"
           >
-            Trainer
+            🎯 Trainer
           </NavButton>
           <NavButton 
             active={activeTab === 'workout'} 
             onClick={() => setActiveTab('workout')}
+            aria-label="Workout Planner"
           >
-            Workout
+            💪 Workout
           </NavButton>
           <NavButton 
             active={activeTab === 'nutrition'} 
             onClick={() => setActiveTab('nutrition')}
+            aria-label="Nutrition Advisor"
           >
-            Nutrition
+            🥗 Nutrition
           </NavButton>
           <NavButton 
             onClick={() => setActiveTab('home')}
+            aria-label="Home"
           >
-            Home
+            🏠 Home
           </NavButton>
         </Navigation>
       )}

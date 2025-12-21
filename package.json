@@ -1,7 +1,7 @@
 {
-  "name": "cv-fitness-trainer",
+  "name": "kinetiq",
   "version": "1.0.0",
-  "description": "AI Fitness Trainer with Computer Vision and LLM Integration",
+  "description": "Kinetiq - AI-Powered Fitness Training Platform with Computer Vision and LLM Integration",
   "main": "index.js",
   "scripts": {
     "start": "react-scripts start",

@@ -34,15 +34,21 @@ const Subtitle = styled.p`
 
 const CameraContainer = styled.div`
   position: relative;
-  border-radius: 24px;
+  border-radius: 28px;
   overflow: hidden;
-  box-shadow: 0 30px 60px rgba(15, 15, 45, 0.4);
+  box-shadow: 0 30px 60px rgba(15, 15, 45, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
   margin-bottom: clamp(20px, 3vw, 40px);
   width: min(90vw, 780px);
   aspect-ratio: 4 / 3;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 35px 70px rgba(15, 15, 45, 0.6), 0 0 0 1px rgba(102, 126, 234, 0.4);
+    border-color: rgba(102, 126, 234, 0.5);
+  }
 `;
 
 const WebcamStyled = styled(Webcam)`
@@ -73,39 +79,76 @@ const Controls = styled.div`
 `;
 
 const Button = styled.button`
-  padding: 12px clamp(16px, 3vw, 28px);
+  padding: 14px clamp(20px, 3vw, 32px);
   border: none;
-  border-radius: 30px;
-  background: ${props => props.primary ? 'linear-gradient(135deg, #ff6b6b, #f94d6a)' : 'rgba(255, 255, 255, 0.15)'};
+  border-radius: 32px;
+  background: ${props => props.primary 
+    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+    : 'rgba(255, 255, 255, 0.12)'};
   color: white;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-  border: 2px solid ${props => props.primary ? 'transparent' : 'rgba(255,255,255,0.2)'};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: ${props => props.primary 
+    ? '0 8px 24px rgba(102, 126, 234, 0.4)' 
+    : '0 8px 20px rgba(0,0,0,0.25)'};
+  border: 2px solid ${props => props.primary ? 'transparent' : 'rgba(255,255,255,0.25)'};
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+  &:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: ${props => props.primary 
+      ? '0 12px 32px rgba(102, 126, 234, 0.5)' 
+      : '0 12px 28px rgba(0,0,0,0.35)'};
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-1px) scale(0.98);
   }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(102, 126, 234, 0.6);
+    outline-offset: 2px;
   }
 `;
 
 const Select = styled.select`
-  padding: 12px clamp(16px, 2vw, 24px);
+  padding: 14px clamp(18px, 2vw, 28px);
   border: none;
-  border-radius: 30px;
-  background: rgba(255,255,255,0.9);
+  border-radius: 32px;
+  background: rgba(255,255,255,0.95);
   font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  min-width: 200px;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+
+  &:hover {
+    box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3), 0 8px 24px rgba(0,0,0,0.15);
+  }
 `;
 
 const InfoGrid = styled.div`
@@ -140,33 +183,57 @@ const InfoValue = styled.span`
 
 const TipBanner = styled.div`
   width: min(95vw, 780px);
-  background: rgba(78, 205, 196, 0.15);
-  border: 1px solid rgba(78, 205, 196, 0.4);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+  border: 1px solid rgba(102, 126, 234, 0.4);
   border-radius: 16px;
-  padding: 14px 18px;
+  padding: 16px 20px;
   margin-bottom: clamp(20px, 3vw, 32px);
-  color: #e0fffb;
+  color: #e8eaff;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   font-size: 0.95rem;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+  backdrop-filter: blur(10px);
 `;
 
 const OverlayBadge = styled.div`
   position: absolute;
   top: 16px;
   left: 16px;
-  background: rgba(255, 105, 97, 0.9);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
   color: white;
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 999px;
   font-size: 0.85rem;
-  font-weight: bold;
-  letter-spacing: 0.05em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   display: flex;
   align-items: center;
-  gap: 6px;
-  box-shadow: 0 10px 20px rgba(255, 105, 97, 0.35);
+  gap: 8px;
+  box-shadow: 0 10px 24px rgba(102, 126, 234, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 10;
+  animation: pulse 2s ease-in-out infinite;
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
 `;
 
 const MetricsGrid = styled.div`
@@ -392,11 +459,12 @@ const FitnessTrainer = () => {
 
   return (
     <Container>
-      <Header>AI Fitness Trainer</Header>
-      <Subtitle>Step in front of your camera and let your virtual coach guide every rep.</Subtitle>
+      <Header>Form Analyzer</Header>
+      <Subtitle>Get real-time feedback on your exercise form. Position yourself in front of your camera and let Kinetiq guide you to perfect technique.</Subtitle>
 
       <TipBanner>
-        💡 For best results, ensure your full body is visible and your space is well lit.
+        <span style={{ fontSize: '1.2rem' }}>💡</span>
+        <span><strong>Pro Tip:</strong> For best results, ensure your full body is visible, your space is well-lit, and you're positioned 6-8 feet from the camera.</span>
       </TipBanner>
 
       <InfoGrid>
@@ -417,7 +485,7 @@ const FitnessTrainer = () => {
       <CameraContainer>
         {isCapturing && (
           <OverlayBadge>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff' }} />
+            <span />
             LIVE
           </OverlayBadge>
         )}
@@ -451,15 +519,21 @@ const FitnessTrainer = () => {
           ))}
         </Select>
         
-        <Button onClick={analyzePosture} disabled={isAnalyzing}>
-          {isAnalyzing ? <LoadingSpinner /> : null}
+        <Button 
+          onClick={analyzePosture} 
+          disabled={isAnalyzing}
+          aria-label="Analyze current posture"
+        >
+          {isAnalyzing ? <LoadingSpinner /> : '📸'}
           {isAnalyzing ? 'Analyzing...' : 'Analyze Posture'}
         </Button>
         
         <Button 
           onClick={isCapturing ? stopContinuousAnalysis : startContinuousAnalysis}
           primary={isCapturing}
+          aria-label={isCapturing ? "Stop continuous analysis" : "Start continuous analysis"}
         >
+          {isCapturing ? '⏸️' : '▶️'}
           {isCapturing ? 'Stop Continuous' : 'Start Continuous'}
         </Button>
       </Controls>

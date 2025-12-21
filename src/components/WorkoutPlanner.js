@@ -30,13 +30,14 @@ const Subtitle = styled.p`
 `;
 
 const FormContainer = styled.div`
-  background: rgba(255,255,255,0.95);
-  border-radius: 24px;
-  padding: clamp(24px, 3vw, 36px);
-  box-shadow: 0 30px 65px rgba(15,15,45,0.35);
-  width: min(90vw, 640px);
+  background: rgba(255,255,255,0.98);
+  border-radius: 28px;
+  padding: clamp(28px, 4vw, 42px);
+  box-shadow: 0 30px 65px rgba(15,15,45,0.4), 0 0 0 1px rgba(0,0,0,0.05);
+  width: min(90vw, 680px);
   margin-bottom: clamp(20px, 3vw, 32px);
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.08);
+  backdrop-filter: blur(10px);
 `;
 
 const FormGroup = styled.div`
@@ -45,40 +46,61 @@ const FormGroup = styled.div`
 
 const Label = styled.label`
   display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
-  color: #111827;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 12px;
-  border: 2px solid rgba(0,0,0,0.08);
-  border-radius: 12px;
+  padding: 14px 16px;
+  border: 2px solid rgba(0,0,0,0.1);
+  border-radius: 14px;
   font-size: 16px;
   box-sizing: border-box;
-  background: rgba(17,24,39,0.03);
+  background: rgba(255,255,255,0.9);
+  transition: all 0.3s ease;
+  font-weight: 500;
 
   &:focus {
     outline: none;
-    border-color: #4ecdc4;
-    box-shadow: 0 0 0 3px rgba(78,205,196,0.2);
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    background: white;
+  }
+
+  &:hover {
+    border-color: rgba(102, 126, 234, 0.3);
   }
 `;
 
 const Select = styled.select`
   width: 100%;
-  padding: 12px;
-  border: 2px solid rgba(0,0,0,0.08);
-  border-radius: 12px;
+  padding: 14px 16px;
+  border: 2px solid rgba(0,0,0,0.1);
+  border-radius: 14px;
   font-size: 16px;
   box-sizing: border-box;
-  background: rgba(17,24,39,0.03);
+  background: rgba(255,255,255,0.9);
+  transition: all 0.3s ease;
+  font-weight: 500;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
 
   &:focus {
     outline: none;
-    border-color: #4ecdc4;
-    box-shadow: 0 0 0 3px rgba(78,205,196,0.2);
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    background-color: white;
+  }
+
+  &:hover {
+    border-color: rgba(102, 126, 234, 0.3);
   }
 `;
 
@@ -102,20 +124,29 @@ const TextArea = styled.textarea`
 
 const Button = styled.button`
   width: 100%;
-  padding: 16px;
+  padding: 18px;
   border: none;
-  border-radius: 60px;
-  background: linear-gradient(135deg, #4ecdc4, #13a8a1);
+  border-radius: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 17px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 15px 30px rgba(78,205,196,0.35);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  letter-spacing: 0.02em;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 35px rgba(78,205,196,0.4);
+  &:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.5);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-1px) scale(0.99);
   }
 
   &:disabled {
@@ -123,30 +154,46 @@ const Button = styled.button`
     cursor: not-allowed;
     transform: none;
   }
+
+  &:focus-visible {
+    outline: 3px solid rgba(102, 126, 234, 0.4);
+    outline-offset: 2px;
+  }
 `;
 
 const WorkoutPlanContainer = styled.div`
-  background: rgba(255,255,255,0.95);
-  border-radius: 24px;
-  padding: clamp(24px, 3vw, 36px);
-  box-shadow: 0 30px 65px rgba(15,15,45,0.35);
-  width: min(95vw, 720px);
+  background: rgba(255,255,255,0.98);
+  border-radius: 28px;
+  padding: clamp(28px, 4vw, 42px);
+  box-shadow: 0 30px 65px rgba(15,15,45,0.4), 0 0 0 1px rgba(0,0,0,0.05);
+  width: min(95vw, 760px);
   margin-bottom: clamp(20px, 3vw, 32px);
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.08);
+  backdrop-filter: blur(10px);
 `;
 
 const ExerciseCard = styled.div`
-  background: rgba(78,205,196,0.08);
-  border-radius: 16px;
-  padding: 20px;
-  margin: 15px 0;
-  border: 1px solid rgba(78,205,196,0.2);
-  box-shadow: 0 12px 30px rgba(78,205,196,0.2);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+  border-radius: 20px;
+  padding: 24px;
+  margin: 18px 0;
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(102, 126, 234, 0.25);
+    border-color: rgba(102, 126, 234, 0.3);
+  }
 `;
 
 const ExerciseTitle = styled.h3`
-  color: #0d1b2a;
-  margin: 0 0 12px 0;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 `;
 
 const ExerciseDetails = styled.div`
@@ -300,12 +347,12 @@ const WorkoutPlanner = () => {
 
   return (
     <Container>
-      <Header>AI Workout Planner</Header>
-      <Subtitle>Share your goals, time, and gear—we’ll craft the perfect session.</Subtitle>
+      <Header>Workout Builder</Header>
+      <Subtitle>Tell us about your fitness goals, available equipment, and time constraints. We'll create a personalized workout plan designed just for you.</Subtitle>
       
       <FormContainer>
-        <h2 style={{ textAlign: 'center', marginBottom: '25px', color: '#333' }}>
-          Tell us about yourself
+        <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#1f2937', fontSize: '1.8rem', fontWeight: 700 }}>
+          Create Your Profile
         </h2>
         
         <FormGroup>
@@ -334,14 +381,30 @@ const WorkoutPlanner = () => {
 
         <FormGroup>
           <Label>Goals (select multiple)</Label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '8px' }}>
             {goalOptions.map(goal => (
-              <label key={goal.value} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <label 
+                key={goal.value} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  cursor: 'pointer',
+                  padding: '10px 16px',
+                  borderRadius: '20px',
+                  background: userProfile.goals.includes(goal.value) 
+                    ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2))' 
+                    : 'rgba(0,0,0,0.05)',
+                  border: `2px solid ${userProfile.goals.includes(goal.value) ? 'rgba(102, 126, 234, 0.4)' : 'rgba(0,0,0,0.1)'}`,
+                  transition: 'all 0.2s ease',
+                  fontWeight: userProfile.goals.includes(goal.value) ? 600 : 500,
+                  color: userProfile.goals.includes(goal.value) ? '#667eea' : '#4b5563'
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={userProfile.goals.includes(goal.value)}
                   onChange={() => handleGoalChange(goal.value)}
-                  style={{ marginRight: '8px' }}
+                  style={{ marginRight: '10px', width: '18px', height: '18px', cursor: 'pointer' }}
                 />
                 {goal.label}
               </label>
@@ -351,14 +414,30 @@ const WorkoutPlanner = () => {
 
         <FormGroup>
           <Label>Available Equipment (select multiple)</Label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '8px' }}>
             {equipmentOptions.map(equipment => (
-              <label key={equipment.value} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <label 
+                key={equipment.value} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  cursor: 'pointer',
+                  padding: '10px 16px',
+                  borderRadius: '20px',
+                  background: userProfile.available_equipment.includes(equipment.value) 
+                    ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2))' 
+                    : 'rgba(0,0,0,0.05)',
+                  border: `2px solid ${userProfile.available_equipment.includes(equipment.value) ? 'rgba(102, 126, 234, 0.4)' : 'rgba(0,0,0,0.1)'}`,
+                  transition: 'all 0.2s ease',
+                  fontWeight: userProfile.available_equipment.includes(equipment.value) ? 600 : 500,
+                  color: userProfile.available_equipment.includes(equipment.value) ? '#667eea' : '#4b5563'
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={userProfile.available_equipment.includes(equipment.value)}
                   onChange={() => handleEquipmentChange(equipment.value)}
-                  style={{ marginRight: '8px' }}
+                  style={{ marginRight: '10px', width: '18px', height: '18px', cursor: 'pointer' }}
                 />
                 {equipment.label}
               </label>
@@ -377,8 +456,8 @@ const WorkoutPlanner = () => {
           />
         </FormGroup>
 
-        <Button onClick={generateWorkoutPlan} disabled={isLoading}>
-          {isLoading ? <LoadingSpinner /> : null}
+        <Button onClick={generateWorkoutPlan} disabled={isLoading} aria-label="Generate workout plan">
+          {isLoading ? <LoadingSpinner /> : '💪'}
           {isLoading ? 'Generating Plan...' : 'Generate Workout Plan'}
         </Button>
       </FormContainer>
@@ -391,7 +470,7 @@ const WorkoutPlanner = () => {
 
       {workoutPlan && (
         <WorkoutPlanContainer>
-          <h2 style={{ textAlign: 'center', marginBottom: '25px', color: '#333' }}>
+          <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#1f2937', fontSize: '1.8rem', fontWeight: 700 }}>
             Your Personalized Workout Plan
           </h2>
           

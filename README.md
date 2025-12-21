@@ -1,6 +1,6 @@
-# Virtual Fitness Trainer MVP
+# Kinetiq
 
-A computer vision-driven fitness trainer offering real-time posture analysis, personalized workout suggestions, and nutrition advice.
+A modern, AI-powered fitness training platform offering real-time posture analysis, personalized workout suggestions, and nutrition advice. Built with computer vision and LLM integration for a comprehensive fitness coaching experience.
 
 ## Features
 
