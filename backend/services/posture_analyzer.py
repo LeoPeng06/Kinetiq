@@ -5,6 +5,21 @@ from typing import Dict, List, Tuple, Optional
 import json
 from dataclasses import dataclass
 from mediapipe.framework.formats import landmark_pb2
+try:
+    from .advanced_analysis import (
+        AdvancedGeometricAnalyzer,
+        BiomechanicalAnalyzer,
+        TemporalAnalyzer,
+        AngleSmoother
+    )
+except ImportError:
+    # Fallback if advanced_analysis is not available
+    from advanced_analysis import (
+        AdvancedGeometricAnalyzer,
+        BiomechanicalAnalyzer,
+        TemporalAnalyzer,
+        AngleSmoother
+    )
 
 @dataclass
 class PostureAnalysis:
@@ -30,8 +45,14 @@ class PostureAnalyzer:
         self.mp_drawing = mp.solutions.drawing_utils
         self._last_landmark_visibilities: List[float] = []
         
+        # Advanced analysis components
+        self.temporal_analyzer = TemporalAnalyzer(window_size=10)
+        self.angle_smoother = AngleSmoother()
+        self.geometric_analyzer = AdvancedGeometricAnalyzer()
+        self.biomechanical_analyzer = BiomechanicalAnalyzer()
+        
         # Note: Removed PyTorch models for better performance
-        # Using rule-based analysis instead of ML models for MVP
+        # Using advanced geometric and biomechanical algorithms instead
         
         # Exercise-specific form criteria
         self.form_criteria = {
@@ -271,79 +292,46 @@ class PostureAnalyzer:
             return 0.3  # Default low score for unsupported exercises
     
     def _score_squat_form(self, points: np.ndarray, angles: Dict[str, float]) -> float:
-        """Score squat form based on strict criteria"""
-        score = 0.0
+        """Score squat form using advanced biomechanical analysis"""
+        # Use advanced biomechanical analyzer
+        biomechanics = self.biomechanical_analyzer.analyze_squat_biomechanics(points, angles)
         
-        # 1. Knee angle analysis (40% of exercise score)
-        knee_angle = angles.get('left_knee_angle', 180)
-        if 85 <= knee_angle <= 95:  # Perfect squat depth
-            score += 0.4
-        elif 75 <= knee_angle <= 105:  # Good squat depth
-            score += 0.3
-        elif 65 <= knee_angle <= 115:  # Acceptable squat depth
-            score += 0.2
-        elif 55 <= knee_angle <= 125:  # Poor squat depth
-            score += 0.1
-        # 0 points for very poor depth
+        # Add temporal consistency if available
+        consistency = self.temporal_analyzer.calculate_consistency_score()
         
-        # 2. Back alignment (30% of exercise score)
-        back_score = self._check_back_alignment(points)
-        score += back_score * 0.3
+        # Combine biomechanical score with consistency
+        base_score = biomechanics['overall_score']
+        final_score = base_score * 0.9 + consistency * 0.1
         
-        # 3. Knee tracking (20% of exercise score)
-        knee_tracking_score = self._check_knee_tracking(points)
-        score += knee_tracking_score * 0.2
-        
-        # 4. Heel contact (10% of exercise score)
-        heel_score = self._check_heel_contact(points)
-        score += heel_score * 0.1
-        
-        return score
+        return min(final_score, 1.0)
     
     def _score_pushup_form(self, points: np.ndarray, angles: Dict[str, float]) -> float:
-        """Score push-up form based on strict criteria"""
-        score = 0.0
+        """Score push-up form using advanced biomechanical analysis"""
+        # Use advanced biomechanical analyzer
+        biomechanics = self.biomechanical_analyzer.analyze_pushup_biomechanics(points, angles)
         
-        # 1. Body alignment (40% of exercise score)
-        alignment_score = self._check_pushup_alignment(points)
-        score += alignment_score * 0.4
+        # Add temporal consistency
+        consistency = self.temporal_analyzer.calculate_consistency_score()
         
-        # 2. Elbow angle (30% of exercise score)
-        elbow_angle = self._calculate_elbow_angle(points)
-        if 80 <= elbow_angle <= 100:  # Good push-up depth
-            score += 0.3
-        elif 70 <= elbow_angle <= 110:
-            score += 0.2
-        elif 60 <= elbow_angle <= 120:
-            score += 0.1
+        # Combine scores
+        base_score = biomechanics['overall_score']
+        final_score = base_score * 0.9 + consistency * 0.1
         
-        # 3. Head position (20% of exercise score)
-        head_score = self._check_head_position(points)
-        score += head_score * 0.2
-        
-        # 4. Core engagement (10% of exercise score)
-        core_score = self._check_core_engagement(points)
-        score += core_score * 0.1
-        
-        return score
+        return min(final_score, 1.0)
     
     def _score_plank_form(self, points: np.ndarray, angles: Dict[str, float]) -> float:
-        """Score plank form based on strict criteria"""
-        score = 0.0
+        """Score plank form using advanced biomechanical analysis"""
+        # Use advanced biomechanical analyzer
+        biomechanics = self.biomechanical_analyzer.analyze_plank_biomechanics(points, angles)
         
-        # 1. Body straightness (50% of exercise score)
-        straightness_score = self._check_plank_straightness(points)
-        score += straightness_score * 0.5
+        # Add temporal consistency
+        consistency = self.temporal_analyzer.calculate_consistency_score()
         
-        # 2. Hip position (30% of exercise score)
-        hip_score = self._check_hip_position(points)
-        score += hip_score * 0.3
+        # Combine scores
+        base_score = biomechanics['overall_score']
+        final_score = base_score * 0.9 + consistency * 0.1
         
-        # 3. Shoulder position (20% of exercise score)
-        shoulder_score = self._check_shoulder_position(points)
-        score += shoulder_score * 0.2
-        
-        return score
+        return min(final_score, 1.0)
     
     def _score_lunge_form(self, points: np.ndarray, angles: Dict[str, float]) -> float:
         """Score lunge form based on strict criteria"""
@@ -388,74 +376,175 @@ class PostureAnalyzer:
         
         return score
     
-    # Helper methods for detailed form analysis
+    # Helper methods for detailed form analysis using advanced algorithms
     def _check_back_alignment(self, points: np.ndarray) -> float:
-        """Check if back is straight during squat"""
-        # Simplified check - in real implementation, would analyze spine curvature
-        return 0.7  # Default moderate score
+        """Check if back is straight during squat using spine curvature analysis"""
+        spine_analysis = self.geometric_analyzer.calculate_spine_curvature(points)
+        return 1.0 - spine_analysis['curvature']
     
     def _check_knee_tracking(self, points: np.ndarray) -> float:
-        """Check if knees track over toes"""
-        # Simplified check - would analyze knee position relative to feet
-        return 0.8  # Default good score
+        """Check if knees track over toes using geometric analysis"""
+        tracking = self.geometric_analyzer.calculate_knee_tracking_accuracy(points)
+        return tracking['overall']
     
     def _check_heel_contact(self, points: np.ndarray) -> float:
-        """Check if heels stay on ground"""
-        # Simplified check - would analyze heel position
+        """Check if heels stay on ground using landmark positions"""
+        if len(points.reshape(-1, 3)) >= 33:
+            points_3d = points.reshape(-1, 3)
+            # Check if heels are at similar y-level to toes (on ground)
+            left_heel = points_3d[29] if len(points_3d) > 29 else None
+            left_foot = points_3d[31] if len(points_3d) > 31 else None
+            
+            if left_heel and left_foot:
+                # Heel should be at similar or lower y-level than foot
+                heel_contact = 1.0 if left_heel[1] >= left_foot[1] - 0.05 else 0.7
+                return heel_contact
         return 0.9  # Default good score
     
     def _check_pushup_alignment(self, points: np.ndarray) -> float:
-        """Check if body is in straight line during push-up"""
-        # Simplified check - would analyze body alignment
-        return 0.6  # Default moderate score
+        """Check if body is in straight line during push-up using alignment analysis"""
+        alignment = self.geometric_analyzer.calculate_body_alignment_score(points)
+        return alignment['alignment']
     
     def _calculate_elbow_angle(self, points: np.ndarray) -> float:
-        """Calculate elbow angle during push-up"""
-        # Simplified calculation - would use actual elbow landmarks
+        """Calculate elbow angle during push-up using actual landmarks"""
+        if len(points.reshape(-1, 3)) >= 33:
+            points_3d = points.reshape(-1, 3)
+            # Use left arm for calculation
+            if len(points_3d) > 15:
+                shoulder = points_3d[11]
+                elbow = points_3d[13]
+                wrist = points_3d[15]
+                
+                v1 = shoulder - elbow
+                v2 = wrist - elbow
+                
+                if np.linalg.norm(v1) > 0 and np.linalg.norm(v2) > 0:
+                    cos_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+                    cos_angle = np.clip(cos_angle, -1.0, 1.0)
+                    return np.degrees(np.arccos(cos_angle))
         return 90.0  # Default 90 degrees
     
     def _check_head_position(self, points: np.ndarray) -> float:
         """Check if head is in neutral position"""
+        if len(points.reshape(-1, 3)) >= 33:
+            points_3d = points.reshape(-1, 3)
+            nose = points_3d[0]
+            left_shoulder = points_3d[11]
+            right_shoulder = points_3d[12]
+            
+            # Head should be roughly centered between shoulders
+            shoulder_center = (left_shoulder[:2] + right_shoulder[:2]) / 2
+            head_offset = abs(nose[0] - shoulder_center[0])
+            
+            # Smaller offset = better head position
+            return 1.0 / (1.0 + head_offset * 10)
         return 0.8  # Default good score
     
     def _check_core_engagement(self, points: np.ndarray) -> float:
-        """Check if core is engaged"""
-        return 0.7  # Default moderate score
+        """Check if core is engaged using body alignment"""
+        alignment = self.geometric_analyzer.calculate_body_alignment_score(points)
+        return alignment['vertical_alignment']
     
     def _check_plank_straightness(self, points: np.ndarray) -> float:
-        """Check if body is straight during plank"""
-        return 0.6  # Default moderate score
+        """Check if body is straight during plank using alignment analysis"""
+        alignment = self.geometric_analyzer.calculate_body_alignment_score(points)
+        return alignment['vertical_alignment']
     
     def _check_hip_position(self, points: np.ndarray) -> float:
-        """Check if hips are in correct position"""
+        """Check if hips are in correct position using geometric analysis"""
+        if len(points.reshape(-1, 3)) >= 33:
+            points_3d = points.reshape(-1, 3)
+            left_shoulder = points_3d[11]
+            left_hip = points_3d[23]
+            left_ankle = points_3d[27]
+            
+            # Calculate if body is in straight line
+            shoulder_hip = left_hip[1] - left_shoulder[1]
+            hip_ankle = left_ankle[1] - left_hip[1]
+            
+            # In perfect plank, these should be roughly equal
+            hip_position_score = 1.0 / (1.0 + abs(shoulder_hip - hip_ankle) * 5)
+            return hip_position_score
         return 0.7  # Default moderate score
     
     def _check_shoulder_position(self, points: np.ndarray) -> float:
         """Check if shoulders are in correct position"""
-        return 0.8  # Default good score
+        alignment = self.geometric_analyzer.calculate_body_alignment_score(points)
+        return alignment['shoulder_hip_parallel']
     
     def _calculate_front_knee_angle(self, points: np.ndarray) -> float:
         """Calculate front knee angle during lunge"""
+        if len(points.reshape(-1, 3)) >= 33:
+            points_3d = points.reshape(-1, 3)
+            # Use left leg as front leg
+            if len(points_3d) > 27:
+                hip = points_3d[23]
+                knee = points_3d[25]
+                ankle = points_3d[27]
+                
+                v1 = hip - knee
+                v2 = ankle - knee
+                
+                if np.linalg.norm(v1) > 0 and np.linalg.norm(v2) > 0:
+                    cos_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+                    cos_angle = np.clip(cos_angle, -1.0, 1.0)
+                    return np.degrees(np.arccos(cos_angle))
         return 90.0  # Default 90 degrees
     
     def _check_back_knee_position(self, points: np.ndarray) -> float:
         """Check if back knee is in correct position"""
+        if len(points.reshape(-1, 3)) >= 33:
+            points_3d = points.reshape(-1, 3)
+            # Check right leg as back leg
+            if len(points_3d) > 28:
+                right_hip = points_3d[24]
+                right_knee = points_3d[26]
+                right_ankle = points_3d[28]
+                
+                # Back knee should be bent (not straight)
+                v1 = right_hip - right_knee
+                v2 = right_ankle - right_knee
+                
+                if np.linalg.norm(v1) > 0 and np.linalg.norm(v2) > 0:
+                    cos_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+                    cos_angle = np.clip(cos_angle, -1.0, 1.0)
+                    angle = np.degrees(np.arccos(cos_angle))
+                    
+                    # Good back knee angle is between 80-100 degrees
+                    if 80 <= angle <= 100:
+                        return 1.0
+                    elif 70 <= angle <= 110:
+                        return 0.7
+                    else:
+                        return 0.4
         return 0.7  # Default moderate score
     
     def _check_torso_alignment(self, points: np.ndarray) -> float:
-        """Check if torso is upright during lunge"""
-        return 0.8  # Default good score
+        """Check if torso is upright during lunge using spine analysis"""
+        spine_analysis = self.geometric_analyzer.calculate_spine_curvature(points)
+        return 1.0 - spine_analysis['curvature']
     
     def _check_deadlift_back(self, points: np.ndarray) -> float:
-        """Check if back is straight during deadlift"""
-        return 0.6  # Default moderate score
+        """Check if back is straight during deadlift using spine curvature"""
+        spine_analysis = self.geometric_analyzer.calculate_spine_curvature(points)
+        return 1.0 - spine_analysis['curvature']
     
     def _check_hip_hinge(self, points: np.ndarray) -> float:
-        """Check if hip hinge is correct"""
-        return 0.7  # Default moderate score
+        """Check if hip hinge is correct using geometric analysis"""
+        hip_angle = self.geometric_analyzer.calculate_hip_hinge_angle(points)
+        # Good hip hinge angle is typically between 120-160 degrees
+        if 120 <= hip_angle <= 160:
+            return 1.0
+        elif 100 <= hip_angle <= 180:
+            return 0.7
+        else:
+            return 0.4
     
     def _check_bar_path(self, points: np.ndarray) -> float:
-        """Check if bar path is correct"""
+        """Check if bar path is correct (estimated from body movement)"""
+        # Without bar detection, estimate from body center movement
+        # This is a simplified check - would need bar tracking for accuracy
         return 0.5  # Default lower score (harder to assess without bar)
     
     def analyze_exercise_form(self, image: np.ndarray, exercise_type: str) -> PostureAnalysis:
@@ -501,7 +590,14 @@ class PostureAnalyzer:
         # Calculate angles for detailed analysis
         angles = self.calculate_angles(landmarks)
         
-        # Generate form score based on pose detection and basic analysis
+        # Smooth angles using Kalman filter for more stable measurements
+        angles = self.angle_smoother.smooth_angles(angles)
+        
+        # Add to temporal analyzer for movement tracking
+        import time
+        self.temporal_analyzer.add_frame(landmarks, angles, time.time())
+        
+        # Generate form score based on pose detection and advanced analysis
         form_score = self._calculate_form_score(landmarks, exercise_type, angles)
         
         # Generate corrections based on form criteria

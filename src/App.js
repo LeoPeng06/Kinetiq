@@ -37,7 +37,7 @@ const GlobalStyle = createGlobalStyle`
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center;  
   width: 100%;
   padding: clamp(20px, 4vw, 50px);
   min-height: 100vh;
