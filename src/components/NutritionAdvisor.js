@@ -294,6 +294,112 @@ const EmptyState = styled.div`
   color: #666;
 `;
 
+const ScannerContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+`;
+
+const ScannerBox = styled.div`
+  position: relative;
+  width: min(90vw, 500px);
+  max-width: 500px;
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+`;
+
+const ScannerView = styled.div`
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  background: #000;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+`;
+
+const ScannerControls = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+`;
+
+const CloseButton = styled.button`
+  padding: 12px 24px;
+  border: 2px solid #667eea;
+  border-radius: 12px;
+  background: transparent;
+  color: #667eea;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(102, 126, 234, 0.1);
+  }
+`;
+
+const BarcodeButton = styled.button`
+  width: 100%;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const LoadingMessage = styled.div`
+  text-align: center;
+  padding: 15px;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 10px;
+`;
+
+const ErrorMessage = styled.div`
+  background: rgba(244, 67, 54, 0.1);
+  color: #b71c1c;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 10px 0;
+  border: 1px solid rgba(244, 67, 54, 0.25);
+  font-size: 14px;
+`;
+
 const getDateKey = (date) => {
   return date.toISOString().split('T')[0];
 };
@@ -316,6 +422,11 @@ const FoodTracker = () => {
     carbs: '',
     fat: ''
   });
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanError, setScanError] = useState(null);
+  const [isLoadingNutrition, setIsLoadingNutrition] = useState(false);
+  const scannerRef = useRef(null);
+  const html5QrCodeRef = useRef(null);
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -408,6 +519,101 @@ const FoodTracker = () => {
     }), { calories: 0 });
   };
 
+  const startBarcodeScanner = async () => {
+    setIsScanning(true);
+    setScanError(null);
+    
+    try {
+      const html5QrCode = new Html5Qrcode("barcode-scanner");
+      html5QrCodeRef.current = html5QrCode;
+      
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 }
+        },
+        (decodedText) => {
+          handleBarcodeScanned(decodedText);
+        },
+        (errorMessage) => {
+          // Ignore scanning errors - they're frequent during scanning
+        }
+      );
+    } catch (err) {
+      setScanError('Failed to start camera. Please ensure camera permissions are granted.');
+      console.error('Scanner error:', err);
+    }
+  };
+
+  const stopBarcodeScanner = () => {
+    if (html5QrCodeRef.current) {
+      html5QrCodeRef.current.stop().then(() => {
+        html5QrCodeRef.current.clear();
+        html5QrCodeRef.current = null;
+      }).catch(err => {
+        console.error('Error stopping scanner:', err);
+      });
+    }
+    setIsScanning(false);
+    setScanError(null);
+  };
+
+  const fetchNutritionData = async (barcode) => {
+    setIsLoadingNutrition(true);
+    setScanError(null);
+    
+    try {
+      // Using OpenFoodFacts API (free, no API key required)
+      const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      
+      if (response.data.status === 1 && response.data.product) {
+        const product = response.data.product;
+        
+        // Extract nutritional data
+        const nutriments = product.nutriments || {};
+        
+        // Calculate per serving (assuming 100g serving if not specified)
+        const calories = Math.round(nutriments['energy-kcal_100g'] || nutriments['energy-kcal'] || 0);
+        const protein = Math.round(nutriments['proteins_100g'] || nutriments['proteins'] || 0);
+        const carbs = Math.round(nutriments['carbohydrates_100g'] || nutriments['carbohydrates'] || 0);
+        const fat = Math.round(nutriments['fat_100g'] || nutriments['fat'] || 0);
+        
+        // Populate form with scanned data
+        setNewFood({
+          name: product.product_name || product.product_name_en || 'Scanned Product',
+          calories: calories.toString(),
+          protein: protein.toString(),
+          carbs: carbs.toString(),
+          fat: fat.toString()
+        });
+        
+        stopBarcodeScanner();
+      } else {
+        setScanError('Product not found in database. Please enter manually.');
+      }
+    } catch (err) {
+      setScanError('Failed to fetch nutritional data. Please try again or enter manually.');
+      console.error('Nutrition API error:', err);
+    } finally {
+      setIsLoadingNutrition(false);
+    }
+  };
+
+  const handleBarcodeScanned = (barcode) => {
+    stopBarcodeScanner();
+    fetchNutritionData(barcode);
+  };
+
+  // Cleanup scanner on unmount
+  useEffect(() => {
+    return () => {
+      if (html5QrCodeRef.current) {
+        html5QrCodeRef.current.stop().catch(() => {});
+      }
+    };
+  }, []);
+
   const totals = getCurrentDayTotals();
   const recentDays = getRecentDays();
   const dailyGoal = 2000; // Default calorie goal
@@ -467,6 +673,11 @@ const FoodTracker = () => {
 
         <FormGroup>
           <Label>Add Food Entry</Label>
+          <BarcodeButton onClick={startBarcodeScanner} disabled={isScanning}>
+            📷 {isScanning ? 'Scanning...' : 'Scan Barcode'}
+          </BarcodeButton>
+          {scanError && <ErrorMessage>{scanError}</ErrorMessage>}
+          {isLoadingNutrition && <LoadingMessage>Loading nutritional data...</LoadingMessage>}
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '10px', marginBottom: '10px' }}>
             <Input
               placeholder="Food name"
@@ -562,6 +773,24 @@ const FoodTracker = () => {
           </ProgressGrid>
         </ProgressSection>
       </Card>
+
+      {isScanning && (
+        <ScannerContainer>
+          <ScannerBox>
+            <h3 style={{ color: '#1f2937', marginBottom: '15px', textAlign: 'center' }}>
+              Scan Barcode
+            </h3>
+            <ScannerView id="barcode-scanner" ref={scannerRef} />
+            {scanError && <ErrorMessage style={{ marginBottom: '15px' }}>{scanError}</ErrorMessage>}
+            <ScannerControls>
+              <CloseButton onClick={stopBarcodeScanner}>Close Scanner</CloseButton>
+            </ScannerControls>
+            <p style={{ textAlign: 'center', color: '#666', fontSize: '12px', marginTop: '10px' }}>
+              Point your camera at a product barcode
+            </p>
+          </ScannerBox>
+        </ScannerContainer>
+      )}
     </Container>
   );
 };
