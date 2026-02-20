@@ -17,7 +17,8 @@
     "styled-components": "^6.0.7",
     "react-webcam": "^7.1.1",
     "chart.js": "^4.4.0",
-    "react-chartjs-2": "^5.2.0"
+    "react-chartjs-2": "^5.2.0",
+    "html5-qrcode": "^2.3.8"
   },
   "browserslist": {
     "production": [
